@@ -1,0 +1,20 @@
+{
+  "name": "divvy",
+  "version": "1.0.0",
+  "main": "index.js",
+  "author": "Jared Lunde <jared@BeStellar.co> (https://BeStellar.co)",
+  "license": "MIT",
+  "inst": {
+    "root": true
+  },
+  "private": true,
+  "workspaces": [
+    "packages/api",
+    "packages/www"
+  ],
+  "scripts": {
+    "inst": "inst add --cwd packages",
+    "api": "INIT_CWD=packages/api yarn --cwd=packages/api",
+    "www": "INIT_CWD=packages/www yarn --cwd=packages/www"
+  }
+}
