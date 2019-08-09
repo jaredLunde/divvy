@@ -745,18 +745,4 @@ const Dashboard = connectCompany(({company, getCompany, match: {params: {id, pag
   )
 })
 
-/*
- <Box w='300' h='300' css={css`margin: auto;`}>
- <VictoryPie
- innerRadius={128}
- data={[
- { x: "Cats", y: 35 },
- { x: "Dogs", y: 40 },
- { x: "Birds", y: 55 }
- ]}
- style={{ labels: { fill: theme.colors.primaryText, fontSize: 20, fontWeight: "bold", fontFamily: theme.text.families.brand}}}
- />
- </Box>
- */
-
 export default Dashboard
