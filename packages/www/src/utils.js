@@ -28,3 +28,4 @@ export const foreign = (members, id) => {
 }
 export const formatCurrency = value => (new Intl.NumberFormat('en-US', {style: 'currency', currency: 'USD'})).format(value)
 export const formatNumber = value => (new Intl.NumberFormat('en-US')).format(value)
+export const pct = (portion, total) => ((portion/total) * 100).toFixed(2) + '%'

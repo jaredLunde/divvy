@@ -7,24 +7,213 @@ import {Spinner, Icon} from '@jaredlunde/curls-addons'
 import {Box, Text, Button, Link, Grid, GridItem} from 'curls'
 import {Input} from '@stellar-apps/forms'
 import {Formik} from 'formik'
+import {VictoryPie, VictoryTooltip} from 'victory'
+import * as yup from 'yup'
+import * as theme from '../theme'
 import {Hero, InputError, StatusButton} from '../components'
 import * as urls from '../urls'
-import {connectCompany, connectShareholders, connectShares} from '../state/containers'
+import {
+  connectCompany,
+  connectShareholders,
+  connectShares,
+  connectAggregateShares,
+} from '../state/containers'
 import {Api} from '../state'
-import {formatDate, foreign, formatCurrency, formatNumber} from '../utils'
-import * as yup from 'yup'
+import {formatDate, foreign, formatCurrency, formatNumber, pct} from '../utils'
 
 
-const maybeDisplaySpinner = status => status === Api.LOADING && <Spinner size='32'/>
-const Overview = connectCompany(({company}) => {
-  return (
-    <Box>
-      <Text kind='heading'>
-        {company.name}
-      </Text>
-    </Box>
-  )
-})
+const maybeDisplaySpinner = status => status === Api.LOADING && <Spinner/>
+const pieStyle = {
+  labels: {
+    fill: theme.colors.primaryText,
+    fontSize: 15,
+    fontWeight: 700,
+    fontFamily: theme.text.families.brand,
+  },
+}
+
+const OwnershipPie = props => <VictoryPie
+  colorScale='cool'
+  innerRadius={96}
+  style={pieStyle}
+  labelComponent={<VictoryTooltip/>}
+  {...props}
+/>
+
+const PieGroup = ({component = OwnershipPie, title, data}) => (
+  <Box flluid>
+    <Text center kind='subheading' p='x4'>
+      {title}
+    </Text>
+    {React.createElement(component, {data})}
+  </Box>
+)
+
+const Overview = compose(
+  connectCompany,
+  connectShares,
+  connectShareholders,
+  connectAggregateShares,
+)(
+  ({company, shareholders, shares, aggregateShares, getShares, getShareholders}) => {
+    const [isByRole, toggleByRole] = useToggle()
+
+    useEffect(
+      () => {
+        if (!shareholders.status) getShareholders(company.id)
+        if (!shares.status) getShares(company.id)
+      },
+      [shareholders.status, shares.status],
+    )
+
+    return (
+      <Box>
+        <Text kind='heading'>
+          {company.name}
+        </Text>
+        <Text kind='subheading' m='b4'>
+          Overview
+        </Text>
+
+        {shareholders.status !== Api.DONE || shares.status !== Api.DONE && <Spinner/>}
+
+        {!aggregateShares
+          ? <EmptyOverview/>
+          : <Box
+            kind='table'
+            as='div'
+            flex
+            row='@desktop'
+            column='@phone'
+            p='y4'
+            m='b4'
+            align='center@phone start@desktop'
+            justify='center@phone start@desktop'
+            ov='xAuto'
+            children={
+              <>
+                <PieGroup
+                  title='Equity share'
+                  data={aggregateShares.owners.map(owner => ({
+                    x: `${owner.firstName} ${owner.lastName} `
+                      + pct(owner.shares, aggregateShares.totalIssued),
+                    y: owner.pct,
+                  }))}
+                />
+
+                <Box>
+                  <Box as='table' m='b3'>
+                    <thead>
+                    <Box kind='tableRow'>
+                      <Text kind='tableHeading'>
+                        Name
+                      </Text>
+                      <Text kind='tableHeading'>
+                        Shares
+                      </Text>
+                      <Text kind='tableHeading'>
+                        Contribution
+                      </Text>
+                    </Box>
+                    </thead>
+                    <tbody>
+                      {aggregateShares.owners.map(owner => (
+                        <Box kind='tableRow' key={owner.id}>
+                          <Text kind='tableCell'>
+                            {owner.firstName} {owner.lastName}
+                          </Text>
+                          <Text kind='tableCell'>
+                            {formatNumber(owner.shares)}
+                          </Text>
+                          <Text kind='tableCell'>
+                            {formatCurrency(owner.contribution)}
+                          </Text>
+                          <Text bold kind='tableCell'>
+                            {pct(owner.shares, aggregateShares.totalIssued)}
+                          </Text>
+                        </Box>
+                      ))}
+                    </tbody>
+                  </Box>
+
+                  <Box flex justify='center@phone start@desktop'>
+                    <Text bold center='@phone' left='@desktop' size='md' m='r3 l4@desktop l3@phone'>
+                      Total issued
+                      <Text light d='block'>
+                        {formatNumber(aggregateShares.totalIssued)}
+                      </Text>
+                    </Text>
+                    <Text bold center='@phone' left='@desktop' size='md' m='l3 r4@desktop r3@phone'>
+                      Total authorized
+                      <Text light d='block'>
+                        {formatNumber(aggregateShares.totalAuthorized)}
+                      </Text>
+                    </Text>
+                  </Box>
+                </Box>
+              </>
+            }/>}
+
+        {!!aggregateShares && <Box
+            kind='table'
+            as='div'
+            flex
+            row='@desktop'
+            column='@phone'
+            p='y4'
+            align='center@phone start@desktop'
+            justify='center@phone start@desktop'
+            ov='xAuto'
+            children={
+              <>
+                <PieGroup
+                  title='Equity share by role'
+                  data={aggregateShares.ownersByRole.map(owner => ({
+                    x: `${owner.role} ${pct(owner.shares, aggregateShares.totalIssued)}`,
+                    y: owner.pct,
+                  }))}
+                />
+                <Box>
+                  <Box as='table' m='b3'>
+                    <thead>
+                    <Box kind='tableRow'>
+                      <Text kind='tableHeading'>
+                        Role
+                      </Text>
+                      <Text kind='tableHeading'>
+                        Shares
+                      </Text>
+                      <Text kind='tableHeading'>
+                        Contribution
+                      </Text>
+                    </Box>
+                    </thead>
+                    <tbody>
+                      {aggregateShares.ownersByRole.map(owner => (
+                        <Box kind='tableRow' key={owner.role}>
+                          <Text kind='tableCell'>
+                            {owner.role}
+                          </Text>
+                          <Text kind='tableCell'>
+                            {formatNumber(owner.shares)}
+                          </Text>
+                          <Text kind='tableCell'>
+                            {formatCurrency(owner.contribution)}
+                          </Text>
+                          <Text bold kind='tableCell'>
+                            {pct(owner.shares, aggregateShares.totalIssued)}
+                          </Text>
+                        </Box>
+                      ))}
+                    </tbody>
+                  </Box>
+                </Box>
+              </>
+            }/>}
+      </Box>
+    )
+  },
+)
 
 const Empty = props => (
   <Box kind='tableRow'>
@@ -39,8 +228,22 @@ const Empty = props => (
   </Box>
 )
 
-const EmptyShareholders = props => <Empty colSpan={4}>You haven't added any shareholders yet</Empty>
+const EmptyShareholders = props => <Empty colSpan={4}>You haven't added any shareholders
+  yet</Empty>
 const EmptyShares = props => <Empty colSpan={5}>You haven't granted any shares yet</Empty>
+const EmptyOverview = connectCompany(props => (
+  <Text flex center p='y5@phone y6@desktop' w='100%' justify='center'>
+    <Box as='span' flex column align='center' maxW='320'>
+      <Icon name='hero' size='196' m='b3'/>
+      <b>
+        You don't have any equity information yet. Add {' '}
+        <Link to={urls.shareholders(props.company.id)}>shareholders</Link> and {' '}
+        <Link to={urls.shares(props.company.id)}>shares</Link>{' '}
+        to display information here.
+      </b>
+    </Box>
+  </Text>
+))
 
 // This is the form validation schema for Shareholders
 const ShareholderSchema = yup.object().shape({
@@ -68,13 +271,15 @@ const ShareholderForm = connectShareholders(
     addShareholder,
     editShareholder,
     deleteShareholder,
-    onDone
+    onDone,
   }) => (
     <Formik
       initialValues={initialValues}
       validationSchema={ShareholderSchema}
       onSubmit={values => {
-        (editExisting ? editShareholder : addShareholder)(values).then(onDone)
+        (
+          editExisting ? editShareholder : addShareholder
+        )(values).then(onDone)
       }}
       render={formik => (
         <Box kind='form' m='b5@tablet b4@phone' onSubmit={formik.handleSubmit}>
@@ -147,7 +352,7 @@ const ShareholderForm = connectShareholders(
         </Box>
       )}
     />
-  )
+  ),
 )
 
 const Shareholders = compose(connectCompany, connectShareholders)(
@@ -210,47 +415,52 @@ const Shareholders = compose(connectCompany, connectShareholders)(
         {!isAddView && !isEditView && (
           <Box kind='table'>
             <thead>
-              <Box kind='tableRow'>
-                <Text kind='tableHeading'>
-                  Name
-                </Text>
-                <Text kind='tableHeading'>
-                  Type
-                </Text>
-                <Text kind='tableHeading'>
-                  Role
-                </Text>
-                <Text kind='tableHeading'>
-                  Created at
-                </Text>
-              </Box>
+            <Box kind='tableRow'>
+              <Text kind='tableHeading'>
+                Name
+              </Text>
+              <Text kind='tableHeading'>
+                Type
+              </Text>
+              <Text kind='tableHeading'>
+                Role
+              </Text>
+              <Text kind='tableHeading'>
+                Created at
+              </Text>
+            </Box>
             </thead>
             <tbody>
-              {shareholders.status !== Api.DONE || (shareholders.members || []).length === 0
-                ? <EmptyShareholders/>
-                : shareholders.members.map(member => (
-                  <Box kind='tableRow' key={member.id}>
-                    <Text kind='tableCell'>
-                      <Text
-                        onClick={() => {toggleEditView(); setEditing(member)}}
-                        role='button'
-                        m='r1'
-                      >
-                        <Icon name='pencil' size='16'/>
-                      </Text>
-                      {member.firstName} {member.lastName}
+            {shareholders.status !== Api.DONE || (
+              shareholders.members || []
+            ).length === 0
+              ? <EmptyShareholders/>
+              : shareholders.members.map(member => (
+                <Box kind='tableRow' key={member.id}>
+                  <Text kind='tableCell'>
+                    <Text
+                      onClick={() => {
+                        toggleEditView()
+                        setEditing(member)
+                      }}
+                      role='button'
+                      m='r1'
+                    >
+                      <Icon name='pencil' size='16'/>
                     </Text>
-                    <Text kind='tableCell'>
-                      {member.type}
-                    </Text>
-                    <Text kind='tableCell'>
-                      {member.role}
-                    </Text>
-                    <Text kind='tableCell'>
-                      {formatDate(member.createdAt)}
-                    </Text>
-                  </Box>
-                ))}
+                    {member.firstName} {member.lastName}
+                  </Text>
+                  <Text kind='tableCell'>
+                    {member.type}
+                  </Text>
+                  <Text kind='tableCell'>
+                    {member.role}
+                  </Text>
+                  <Text kind='tableCell'>
+                    {formatDate(member.createdAt)}
+                  </Text>
+                </Box>
+              ))}
             </tbody>
           </Box>
         )}
@@ -270,7 +480,7 @@ const ShareSchema = yup.object().shape({
     .required('Required'),
   count: yup.number()
     .min(1)
-    .required('Required')
+    .required('Required'),
 })
 
 const ShareForm = compose(connectShareholders, connectShares)(
@@ -281,13 +491,15 @@ const ShareForm = compose(connectShareholders, connectShares)(
     addShare,
     editShare,
     deleteShare,
-    onDone
+    onDone,
   }) => (
     <Formik
       initialValues={initialValues}
       validationSchema={ShareSchema}
       onSubmit={values => {
-        (editExisting ? editShare : addShare)(values).then(onDone)
+        (
+          editExisting ? editShare : addShare
+        )(values).then(onDone)
       }}
       render={formik => (
         <Box kind='form' m='b5@tablet b4@phone' onSubmit={formik.handleSubmit}>
@@ -346,7 +558,7 @@ const ShareForm = compose(connectShareholders, connectShares)(
         </Box>
       )}
     />
-  )
+  ),
 )
 
 const Shares = compose(connectCompany, connectShares, connectShareholders)(
@@ -395,7 +607,7 @@ const Shares = compose(connectCompany, connectShares, connectShareholders)(
             company: company.id,
             shareholder: editing.shareholder,
             price: editing.price,
-            count: editing.count
+            count: editing.count,
           }}
           onDone={toggleEditView}
         />}
@@ -403,55 +615,60 @@ const Shares = compose(connectCompany, connectShares, connectShareholders)(
         {!isAddView && !isEditView && (
           <Box kind='table'>
             <thead>
-              <Box kind='tableRow'>
-                <Text kind='tableHeading'>
-                  Shareholder
-                </Text>
-                <Text kind='tableHeading'>
-                  Price
-                </Text>
-                <Text kind='tableHeading'>
-                  Count
-                </Text>
-                <Text kind='tableHeading'>
-                  Contribution
-                </Text>
-                <Text kind='tableHeading'>
-                  Issued
-                </Text>
-              </Box>
+            <Box kind='tableRow'>
+              <Text kind='tableHeading'>
+                Shareholder
+              </Text>
+              <Text kind='tableHeading'>
+                Price
+              </Text>
+              <Text kind='tableHeading'>
+                Count
+              </Text>
+              <Text kind='tableHeading'>
+                Contribution
+              </Text>
+              <Text kind='tableHeading'>
+                Issued
+              </Text>
+            </Box>
             </thead>
             <tbody>
-              {shares.status !== Api.DONE || shareholders.status !== Api.DONE || (shares.members || []).length === 0
-                ? <EmptyShares/>
-                : shares.members.map(member => (
-                  <Box kind='tableRow' key={member.id}>
-                    <Text kind='tableCell'>
-                      <Text
-                        onClick={() => {toggleEditView(); setEditing(member)}}
-                        role='button'
-                        m='r1'
-                      >
-                        <Icon name='pencil' size='16'/>
-                      </Text>
+            {shares.status !== Api.DONE || shareholders.status !== Api.DONE || (
+              shares.members || []
+            ).length === 0
+              ? <EmptyShares/>
+              : shares.members.map(member => (
+                <Box kind='tableRow' key={member.id}>
+                  <Text kind='tableCell'>
+                    <Text
+                      onClick={() => {
+                        toggleEditView()
+                        setEditing(member)
+                      }}
+                      role='button'
+                      m='r1'
+                    >
+                      <Icon name='pencil' size='16'/>
+                    </Text>
 
-                      {foreign(shareholders.members, member.shareholder).firstName}{' '}
-                      {foreign(shareholders.members, member.shareholder).lastName}
-                    </Text>
-                    <Text kind='tableCell'>
-                      {member.price}
-                    </Text>
-                    <Text kind='tableCell'>
-                      {formatNumber(member.count)}
-                    </Text>
-                    <Text kind='tableCell'>
-                      {formatCurrency(member.count * member.price)}
-                    </Text>
-                    <Text kind='tableCell'>
-                      {formatDate(member.createdAt)}
-                    </Text>
-                  </Box>
-                ))}
+                    {foreign(shareholders.members, member.shareholder).firstName}{' '}
+                    {foreign(shareholders.members, member.shareholder).lastName}
+                  </Text>
+                  <Text kind='tableCell'>
+                    {member.price}
+                  </Text>
+                  <Text kind='tableCell'>
+                    {formatNumber(member.count)}
+                  </Text>
+                  <Text kind='tableCell'>
+                    {formatCurrency(member.count * member.price)}
+                  </Text>
+                  <Text kind='tableCell'>
+                    {formatDate(member.createdAt)}
+                  </Text>
+                </Box>
+              ))}
             </tbody>
           </Box>
         )}
@@ -460,7 +677,6 @@ const Shares = compose(connectCompany, connectShares, connectShareholders)(
   },
 )
 
-const Grant = connectCompany(({company}) => `${company.name} grant shares`)
 export const Sidebar = connectCompany(({company}) => (
   <Box as='ul' flex column bg='primary' w='100%' h='100%' p='y3' bw='b1' bc='translucentLight'>
     <Box as='li'>
@@ -521,7 +737,6 @@ const Dashboard = connectCompany(({company, getCompany, match: {params: {id, pag
                 <Route path={urls.dashboard(id)} exact component={Overview}/>
                 <Route path={urls.shareholders(id)} exact component={Shareholders}/>
                 <Route path={urls.shares(id)} exact component={Shares}/>
-                <Route path={urls.grant(id)} exact component={Grant}/>
               </Switch>
             )}
         </GridItem>

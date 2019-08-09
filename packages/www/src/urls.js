@@ -10,7 +10,6 @@ export const start = () => '/start'
 export const dashboard = id => `/dashboard/${id}`
 export const shareholders = id => `/dashboard/${id}/shareholders`
 export const shares = id => `/dashboard/${id}/shares`
-export const grant = id => `/dashboard/${id}/shares/grant`
 
 
 
