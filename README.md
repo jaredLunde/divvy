@@ -36,13 +36,13 @@ Starts a dev server in `production` mode
 
 ## Shortcuts
 ### Frontend
-- [Package](tree/master/packages/www)
-- [App source](tree/master/packages/www/src)
-- [Pages](tree/master/packages/www/src/pages)
-- [Components](tree/master/packages/www/src/components)
-- [Theme](tree/master/packages/www/src/theme)
+- [Package](./packages/www)
+- [App source](./packages/www/src)
+- [Pages](./packages/www/src/pages)
+- [Components](./packages/www/src/components)
+- [Theme](./packages/www/src/theme)
 
 ### API
-- [Package](tree/master/packages/api)
-- [API source](tree/master/packages/api/src)
-- [Express handler](tree/master/packages/api/src/index.js)
+- [Package](./packages/api)
+- [API source](./packages/api/src)
+- [Express handler](./packages/api/src/index.js)
