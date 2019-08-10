@@ -9,6 +9,7 @@ import {Input} from '@stellar-apps/forms'
 import {Formik} from 'formik'
 import {VictoryPie, VictoryTooltip} from 'victory'
 import * as yup from 'yup'
+import {pascal} from 'change-case'
 import * as theme from '../theme'
 import {Hero, InputError, StatusButton} from '../components'
 import * as urls from '../urls'
@@ -169,7 +170,7 @@ const Overview = compose(
                 <PieGroup
                   title='Equity share by role'
                   data={aggregateShares.ownersByRole.map(owner => ({
-                    x: `${owner.role} ${pct(owner.shares, aggregateShares.totalIssued)}`,
+                    x: `${pascal(owner.role)} ${pct(owner.shares, aggregateShares.totalIssued)}`,
                     y: owner.pct,
                   }))}
                 />
@@ -192,7 +193,7 @@ const Overview = compose(
                       {aggregateShares.ownersByRole.map(owner => (
                         <Box kind='tableRow' key={owner.role}>
                           <Text kind='tableCell'>
-                            {owner.role}
+                            {pascal(owner.role)}
                           </Text>
                           <Text kind='tableCell'>
                             {formatNumber(owner.shares)}
