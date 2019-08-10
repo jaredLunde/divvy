@@ -9,7 +9,8 @@ Starts a dev server in `development` mode at http://127.0.0.1:3000
 Starts a dev server in `production` mode at http://127.0.0.1:3000
 
 ## Shortcuts
-- [Source](tree/master/packages/www/src)
-- [Pages](tree/master/packages/www/src/pages)
-- [Components](tree/master/packages/www/src/components)
-- [Theme](tree/master/packages/www/src/theme)
+- [Source](./src)
+- [Pages](./src/pages)
+- [Components](./src/components)
+- [Redux](./src/state)
+- [Theme](./src/theme)
