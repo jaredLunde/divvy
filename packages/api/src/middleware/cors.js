@@ -2,8 +2,8 @@ import cors from 'cors'
 
 
 let whitelist = [
-  // 'https://foo.app',
-  // 'https://staging.foo.app'
+  'https://divvy.jaredlunde.com',
+  'https://staging-divvy.jaredlunde.com'
 ]
 
 export const config = {
