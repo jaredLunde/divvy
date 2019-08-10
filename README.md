@@ -47,6 +47,7 @@ Starts a dev server in `production` mode at http://127.0.0.1:4000
 - [App source](./packages/www/src)
 - [Pages](./packages/www/src/pages)
 - [Components](./packages/www/src/components)
+- [Redux](./packages/www/src/state)
 - [Theme](./packages/www/src/theme)
 
 ### API
