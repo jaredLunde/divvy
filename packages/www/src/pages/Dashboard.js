@@ -592,7 +592,7 @@ const Shares = compose(connectCompany, connectShares, connectShareholders)(
           </Box>
           <Box>
             <Button kind='tableAction' onClick={toggleAddView}>
-              Grant +
+              {isAddView ? 'Cancel' : 'Grant +'}
             </Button>
           </Box>
         </Box>
