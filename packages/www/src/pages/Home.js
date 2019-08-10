@@ -25,7 +25,7 @@ const Home = props => (
           <TransitionDrop fromTop={-8} easing='swiftMove'>
             {({css}) => (
               <Text kind='hero' m='b4' css={css}>
-                Keep that napkin<br/>
+                Get that napkin<br/>
                 off your cap table
               </Text>
             )}
