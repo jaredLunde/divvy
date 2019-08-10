@@ -11,10 +11,13 @@ export const company = (state = {}, action) => {
   switch (action.type) {
     case actions.ADD_COMPANY:
       return {...assignWithCreatedAt(action.company), status: action.status}
+
     case actions.GET_COMPANY:
       return {status: action.status}
+
     case actions.RECEIVE_COMPANY:
       return {...assignWithCreatedAt(action.company), status: action.status}
+
     default:
       return state
   }
