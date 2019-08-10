@@ -24,10 +24,10 @@ Use the scripts below from the workspace root to run development servers
 on your local machine
 
 ### yarn www start
-Starts a dev server in `development` mode
+Starts a dev server in `development` mode at http://127.0.0.1:3000
 
 ### yarn www start production
-Starts a dev server in `production` mode
+Starts a dev server in `production` mode at http://127.0.0.1:3000
 
 ---
 
@@ -36,10 +36,10 @@ Use the scripts below from the workspace root to run development servers
 on your local machine
 
 ### yarn api start
-Starts a dev server in `development` mode
+Starts a dev server in `development` mode at http://127.0.0.1:4000
 
 ### yarn api start production
-Starts a dev server in `production` mode
+Starts a dev server in `production` mode at http://127.0.0.1:4000
 
 ---
 
