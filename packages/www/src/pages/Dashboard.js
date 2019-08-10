@@ -41,7 +41,7 @@ const OwnershipPie = props => <VictoryPie
 />
 
 const PieGroup = ({component = OwnershipPie, title, data}) => (
-  <Box flluid>
+  <Box fluid>
     <Text center kind='subheading' p='x4'>
       {title}
     </Text>
@@ -355,8 +355,8 @@ const ShareholderForm = connectShareholders(
   ),
 )
 
-const Shareholders = compose(connectCompany, connectShareholders)(
-  ({company, shareholders, addShareholder, getShareholders}) => {
+const Shareholders = compose(connectCompany, connectShareholders, connectShares)(
+  ({company, shareholders, getShares, addShareholder, getShareholders}) => {
     const [isAddView, toggleAddView] = useToggle()
     const [isEditView, toggleEditView] = useToggle()
     const [editing, setEditing] = useState(null)
@@ -409,7 +409,10 @@ const Shareholders = compose(connectCompany, connectShareholders)(
             type: editing.type,
             role: editing.role,
           }}
-          onDone={toggleEditView}
+          onDone={() => {
+            toggleEditView()
+            getShares(company.id)
+          }}
         />}
 
         {!isAddView && !isEditView && (

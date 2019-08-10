@@ -52,7 +52,7 @@ export const connectShares = connect(
 
 export const connectAggregateShares = connect(
   state => {
-    if (state.shares?.members && state.shareholders?.members) {
+    if (state.shares?.members?.length && state.shareholders?.members?.length) {
       const totalIssued = state.shares.members.reduce((p, c) => c.count + p, 0)
       // creates the aggregate share information
       let owners = {}

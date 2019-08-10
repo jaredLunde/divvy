@@ -15,4 +15,3 @@ if (__DEV__) {
 
 export const store = createStore(divvy, applyMiddleware(...middleware))
 export * from './actions'
-if (__DEV__) store.subscribe(() => console.log(store.getState()))
