@@ -78,10 +78,11 @@
   "scripts": {
     "analyze": "ANALYZE=true yarn start production",
     "start": "stellar-scripts start",
-    "deploy": "stellar-scripts deploy",
+    "deploy": "yarn clean && stellar-scripts deploy",
     "bundle": "stellar-scripts bundle",
     "teardown": "stellar-scripts teardown",
     "sls": "serverless",
-    "postinstall": "rimraf .cache-loader"
+    "postinstall": "yarn clean",
+    "clean": "rimraf .cache-loader"
   }
 }
