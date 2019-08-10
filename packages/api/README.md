@@ -9,5 +9,5 @@ Starts a dev server in `development` mode at http://127.0.0.1:4000
 Starts a dev server in `production` mode at http://127.0.0.1:4000
 
 ## Shortcuts
-- [Source](tree/master/packages/api/src)
-- [Express handler](tree/master/packages/api/src/index.js)
+- [Source](./src)
+- [Express handler](./src/index.js)
