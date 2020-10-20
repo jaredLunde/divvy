@@ -53,7 +53,7 @@
     "curls": "^4.0.7",
     "formik": "^1.5.8",
     "invariant": "2.2.4",
-    "object-path": "^0.11.4",
+    "object-path": "^0.11.5",
     "prop-types": "^15.6.2",
     "react": "^16.8.6",
     "react-broker": "^2.0.0",
